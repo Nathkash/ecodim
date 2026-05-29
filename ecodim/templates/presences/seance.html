@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% block title %}Présences {{ seance.date|date:"d/m/Y" }} — Écodim{% endblock %}
+{% block page_title %}Feuille de présence{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Séance du {{ seance.date|date:"d/m/Y" }}</h1>
+        {% if already_saved %}
+        <p style="color:var(--success); font-weight:600;">
+            <i class="fas fa-check-circle"></i> Présences enregistrées
+        </p>
+        {% else %}
+        <p>Cochez les présents puis enregistrez</p>
+        {% endif %}
+    </div>
+    <a href="{% url 'presences_list' %}" class="btn btn-outline">
+        <i class="fas fa-arrow-left"></i> Retour
+    </a>
+</div>
+
+{% if already_saved %}
+<!-- ═══ MODE LECTURE SEULE ═══ -->
+<div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:12px;
+            padding:16px 20px; margin-bottom:24px; display:flex;
+            align-items:center; gap:12px;">
+    <i class="fas fa-lock" style="color:var(--success); font-size:18px;"></i>
+    <p style="color:#065f46; font-size:14px; font-weight:500;">
+        Les présences de cette séance ont déjà été enregistrées toute modification est impossible.
+    </p>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;" class="presence-grid">
+
+    <!-- Enfants lecture seule -->
+    <div class="card">
+        <p class="card-title">
+            <i class="fas fa-child" style="color:var(--accent);"></i>
+            Enfants
+        </p>
+
+        <p style="font-size:12px; font-weight:700; color:var(--gray-400);
+                   text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">
+            Classe A — 0 à 7 ans
+        </p>
+        {% for enfant in enfants %}
+            {% if enfant.age <= 7 %}
+            <div style="display:flex; align-items:center; gap:12px;
+                        padding:12px; border-radius:8px; margin-bottom:4px;
+                        background:{% if presences_enfants|get_item:enfant.pk %}#ecfdf5{% else %}#fef2f2{% endif %};">
+                <i class="fas {% if presences_enfants|get_item:enfant.pk %}fa-check-circle{% else %}fa-times-circle{% endif %}"
+                   style="font-size:18px; color:{% if presences_enfants|get_item:enfant.pk %}var(--success){% else %}var(--danger){% endif %};"></i>
+                <div class="avatar" style="width:34px; height:34px; font-size:12px;">
+                    {{ enfant.prenom|first }}{{ enfant.nom|first }}
+                </div>
+                <span style="font-size:14px; font-weight:500; color:var(--gray-800);">
+                    {{ enfant.prenom }} {{ enfant.nom }}
+                </span>
+                <span style="margin-left:auto; font-size:12px; font-weight:600;
+                             color:{% if presences_enfants|get_item:enfant.pk %}var(--success){% else %}var(--danger){% endif %};">
+                    {% if presences_enfants|get_item:enfant.pk %}Présent{% else %}Absent{% endif %}
+                </span>
+            </div>
+            {% endif %}
+        {% endfor %}
+
+        <div style="border-top:1px solid var(--gray-100); margin:16px 0;"></div>
+
+        <p style="font-size:12px; font-weight:700; color:var(--gray-400);
+                   text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">
+            Classe B — 8 ans et +
+        </p>
+        {% for enfant in enfants %}
+            {% if enfant.age > 7 %}
+            <div style="display:flex; align-items:center; gap:12px;
+                        padding:12px; border-radius:8px; margin-bottom:4px;
+                        background:{% if presences_enfants|get_item:enfant.pk %}#ecfdf5{% else %}#fef2f2{% endif %};">
+                <i class="fas {% if presences_enfants|get_item:enfant.pk %}fa-check-circle{% else %}fa-times-circle{% endif %}"
+                   style="font-size:18px; color:{% if presences_enfants|get_item:enfant.pk %}var(--success){% else %}var(--danger){% endif %};"></i>
+                <div class="avatar" style="width:34px; height:34px; font-size:12px;">
+                    {{ enfant.prenom|first }}{{ enfant.nom|first }}
+                </div>
+                <span style="font-size:14px; font-weight:500; color:var(--gray-800);">
+                    {{ enfant.prenom }} {{ enfant.nom }}
+                </span>
+                <span style="margin-left:auto; font-size:12px; font-weight:600;
+                             color:{% if presences_enfants|get_item:enfant.pk %}var(--success){% else %}var(--danger){% endif %};">
+                    {% if presences_enfants|get_item:enfant.pk %}Présent{% else %}Absent{% endif %}
+                </span>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+</div>
+
+{% else %}
+<!-- ═══ MODE SAISIE ═══ -->
+<form method="POST">
+    {% csrf_token %}
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+
+        <!-- Enfants -->
+        <div class="card">
+            <p class="card-title">
+                <i class="fas fa-child" style="color:var(--accent);"></i>
+                Enfants
+            </p>
+
+            <p style="font-size:12px; font-weight:700; color:var(--gray-400);
+                       text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">
+                Classe A — 0 à 7 ans
+            </p>
+            {% for enfant in enfants %}
+                {% if enfant.age <= 7 %}
+                <label style="display:flex; align-items:center; gap:12px;
+                               padding:12px; border-radius:8px; cursor:pointer;
+                               transition:background 0.15s; margin-bottom:4px;"
+                       onmouseover="this.style.background='var(--gray-50)'"
+                       onmouseout="this.style.background=''">
+                    <input type="checkbox" name="enfant_{{ enfant.pk }}"
+                           {% if presences_enfants|get_item:enfant.pk %}checked{% endif %}
+                           style="width:18px; height:18px; accent-color:var(--navy); cursor:pointer;">
+                    <div class="avatar" style="width:34px; height:34px; font-size:12px;">
+                        {{ enfant.prenom|first }}{{ enfant.nom|first }}
+                    </div>
+                    <span style="font-size:14px; font-weight:500; color:var(--gray-800);">
+                        {{ enfant.prenom }} {{ enfant.nom }}
+                    </span>
+                </label>
+                {% endif %}
+            {% endfor %}
+
+            <div style="border-top:1px solid var(--gray-100); margin:16px 0;"></div>
+
+            <p style="font-size:12px; font-weight:700; color:var(--gray-400);
+                       text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">
+                Classe B — 8 ans et +
+            </p>
+            {% for enfant in enfants %}
+                {% if enfant.age > 7 %}
+                <label style="display:flex; align-items:center; gap:12px;
+                               padding:12px; border-radius:8px; cursor:pointer;
+                               transition:background 0.15s; margin-bottom:4px;"
+                       onmouseover="this.style.background='var(--gray-50)'"
+                       onmouseout="this.style.background=''">
+                    <input type="checkbox" name="enfant_{{ enfant.pk }}"
+                           {% if presences_enfants|get_item:enfant.pk %}checked{% endif %}
+                           style="width:18px; height:18px; accent-color:var(--navy); cursor:pointer;">
+                    <div class="avatar" style="width:34px; height:34px; font-size:12px;">
+                        {{ enfant.prenom|first }}{{ enfant.nom|first }}
+                    </div>
+                    <span style="font-size:14px; font-weight:500; color:var(--gray-800);">
+                        {{ enfant.prenom }} {{ enfant.nom }}
+                    </span>
+                </label>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Moniteurs -->
+        <div class="card">
+            <p class="card-title">
+                <i class="fas fa-users" style="color:var(--success);"></i>
+                Moniteurs
+            </p>
+            {% for moniteur in moniteurs %}
+            <label style="display:flex; align-items:center; gap:12px;
+                           padding:12px; border-radius:8px; cursor:pointer;
+                           transition:background 0.15s; margin-bottom:4px;"
+                   onmouseover="this.style.background='var(--gray-50)'"
+                   onmouseout="this.style.background=''">
+                <input type="checkbox" name="moniteur_{{ moniteur.pk }}"
+                       {% if presences_moniteurs|get_item:moniteur.pk %}checked{% endif %}
+                       style="width:18px; height:18px; accent-color:var(--success); cursor:pointer;">
+                <div class="avatar" style="width:34px; height:34px; font-size:12px; background:var(--success);">
+                    {{ moniteur.first_name|first }}{{ moniteur.last_name|first }}
+                </div>
+                <div>
+                    <p style="font-size:14px; font-weight:500; color:var(--gray-800);">
+                        {{ moniteur.first_name }} {{ moniteur.last_name }}
+                    </p>
+                    <p style="font-size:11px; color:var(--gray-400);">
+                        {% for c in moniteur.classes_assignees.all %}
+                            {{ c.get_nom_display }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                </div>
+            </label>
+            {% empty %}
+            <p style="color:var(--gray-400); font-size:14px; text-align:center; padding:20px;">
+                Aucun moniteur
+            </p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div style="margin-top:24px; display:flex; justify-content:flex-end;">
+        <button type="submit" class="btn btn-primary" style="padding:14px 32px; font-size:15px;">
+            <i class="fas fa-save"></i> Enregistrer les présences
+        </button>
+    </div>
+</form>
+{% endif %}
+
+{% endblock %}

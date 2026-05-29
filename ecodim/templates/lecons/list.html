@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block title %}Leçons — Écodim{% endblock %}
+{% block page_title %}Gestion des Leçons{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Leçons</h1>
+        <p>{{ lecons|length }} leçon(s) au total</p>
+    </div>
+    {% if request.user.role == 'president' %}
+    <a href="{% url 'lecon_ajouter' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nouvelle leçon
+    </a>
+    {% endif %}
+</div>
+
+<!-- Filtres statut -->
+<div style="display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap;">
+    <button onclick="filterLecons('all')" class="btn btn-outline btn-sm filter-btn active"
+            data-filter="all">Toutes</button>
+    <button onclick="filterLecons('a_venir')" class="btn btn-outline btn-sm filter-btn"
+            data-filter="a_venir">
+        <i class="fas fa-clock"></i> À venir
+    </button>
+    <button onclick="filterLecons('donnee')" class="btn btn-outline btn-sm filter-btn"
+            data-filter="donnee">
+        <i class="fas fa-check"></i> Données
+    </button>
+    <button onclick="filterLecons('reportee')" class="btn btn-outline btn-sm filter-btn"
+            data-filter="reportee">
+        <i class="fas fa-redo"></i> Reportées
+    </button>
+</div>
+
+<div style="display:flex; flex-direction:column; gap:14px;" id="leconsList">
+    {% for lecon in lecons %}
+    <div class="card lecon-item" data-statut="{{ lecon.statut }}"
+         style="padding:20px 24px; display:flex; align-items:center;
+                justify-content:space-between; gap:20px;">
+        <div style="display:flex; align-items:center; gap:16px; flex:1;">
+            <div style="width:46px; height:46px; border-radius:10px;
+                        display:flex; align-items:center; justify-content:center;
+                        font-size:18px; flex-shrink:0;
+                        {% if lecon.statut == 'a_venir' %}background:#eff6ff; color:var(--accent);
+                        {% elif lecon.statut == 'donnee' %}background:#ecfdf5; color:var(--success);
+                        {% else %}background:#fffbeb; color:var(--warning);{% endif %}">
+                <i class="fas fa-book-open"></i>
+            </div>
+            <div style="flex:1;">
+                <p style="font-weight:700; color:var(--navy); font-size:15px;">
+                    {{ lecon.titre }}
+                </p>
+                <div style="display:flex; gap:16px; margin-top:5px; flex-wrap:wrap;">
+                    <span style="font-size:12px; color:var(--gray-400);">
+                        <i class="fas fa-calendar"></i> {{ lecon.date|date:"d/m/Y" }}
+                    </span>
+                    <span style="font-size:12px; color:var(--gray-400);">
+                        <i class="fas fa-chalkboard"></i> {{ lecon.classe }}
+                    </span>
+                    <span style="font-size:12px; color:var(--gray-400);">
+                        <i class="fas fa-user"></i>
+                        {{ lecon.moniteur_assigne.first_name }}
+                        {{ lecon.moniteur_assigne.last_name }}
+                    </span>
+                    {% if lecon.reference_biblique %}
+                    <span style="font-size:12px; color:var(--accent);">
+                        <i class="fas fa-bible"></i> {{ lecon.reference_biblique }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; flex-shrink:0;">
+            {% if lecon.statut == 'a_venir' %}
+            <span class="badge badge-blue">À venir</span>
+            {% elif lecon.statut == 'donnee' %}
+            <span class="badge badge-green">Donnée</span>
+            {% else %}
+            <span class="badge badge-orange">Reportée</span>
+            {% endif %}
+            <a href="{% url 'lecon_detail' lecon.pk %}" class="btn btn-outline btn-sm">
+                <i class="fas fa-eye"></i>
+            </a>
+            {% if request.user.role == 'president' %}
+            <a href="{% url 'lecon_modifier' lecon.pk %}" class="btn btn-primary btn-sm">
+                <i class="fas fa-pen"></i>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div style="text-align:center; padding:60px; color:var(--gray-400);">
+        <i class="fas fa-book-open" style="font-size:40px; opacity:0.3;
+           display:block; margin-bottom:16px;"></i>
+        Aucune leçon enregistrée
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+function filterLecons(statut) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`[data-filter="${statut}"]`).classList.add('active');
+    document.querySelectorAll('.lecon-item').forEach(item => {
+        item.style.display = (statut === 'all' || item.dataset.statut === statut) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% block title %}{% if lecon %}Modifier{% else %}Nouvelle{% endif %} leçon — Écodim{% endblock %}
+{% block page_title %}{% if lecon %}Modifier la leçon{% else %}Nouvelle leçon{% endif %}{% endblock %}
+
+{% block content %}
+<div style="max-width:680px;">
+    <div class="page-header">
+        <div>
+            <h1>{% if lecon %}Modifier{% else %}Nouvelle{% endif %} leçon</h1>
+            <p>{% if lecon %}Mettre à jour{% else %}Planifier et assigner{% endif %} une leçon</p>
+        </div>
+        <a href="{% url 'lecons_list' %}" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    <div class="card">
+        <form method="POST">
+            {% csrf_token %}
+
+            <p class="card-title">
+                <i class="fas fa-book-open" style="color:var(--accent);"></i>
+                Contenu de la leçon
+            </p>
+
+            <div class="form-group">
+                <label>Titre de la leçon *</label>
+                <input type="text" name="titre" class="form-control"
+                       value="{{ lecon.titre|default:'' }}"
+                       placeholder="Ex: L'amour de Dieu" required>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Thème</label>
+                    <input type="text" name="theme" class="form-control"
+                           value="{{ lecon.theme|default:'' }}"
+                           placeholder="Ex: Foi et espérance">
+                </div>
+                <div class="form-group">
+                    <label>Référence biblique</label>
+                    <input type="text" name="reference_biblique" class="form-control"
+                           value="{{ lecon.reference_biblique|default:'' }}"
+                           placeholder="Ex: Jean 3:16">
+                </div>
+            </div>
+
+            <div style="border-top:1px solid var(--gray-100);
+                        padding-top:24px; margin:8px 0 20px;">
+                <p class="card-title">
+                    <i class="fas fa-calendar" style="color:var(--accent);"></i>
+                    Planification
+                </p>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Date du dimanche *</label>
+                    <input type="date" name="date" class="form-control"
+                           value="{{ lecon.date|date:'Y-m-d'|default:'' }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Classe *</label>
+                    <select name="classe" class="form-control" required>
+                        <option value="">-- Choisir une classe --</option>
+                        {% for classe in classes %}
+                        <option value="{{ classe.pk }}"
+                            {% if lecon and lecon.classe.pk == classe.pk %}selected{% endif %}>
+                            {{ classe.get_nom_display }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Moniteur assigné *</label>
+                <select name="moniteur_assigne" class="form-control" required>
+                    <option value="">-- Choisir un moniteur --</option>
+                    {% for moniteur in moniteurs %}
+                    <option value="{{ moniteur.pk }}"
+                        {% if lecon and lecon.moniteur_assigne.pk == moniteur.pk %}selected{% endif %}>
+                        {{ moniteur.first_name }} {{ moniteur.last_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {% if lecon %}
+            <div class="form-group">
+                <label>Statut</label>
+                <select name="statut" class="form-control">
+                    <option value="a_venir" {% if lecon.statut == 'a_venir' %}selected{% endif %}>
+                        À venir
+                    </option>
+                    <option value="donnee" {% if lecon.statut == 'donnee' %}selected{% endif %}>
+                        Donnée
+                    </option>
+                    <option value="reportee" {% if lecon.statut == 'reportee' %}selected{% endif %}>
+                        Reportée
+                    </option>
+                </select>
+            </div>
+            {% endif %}
+
+            <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:8px;">
+                <a href="{% url 'lecons_list' %}" class="btn btn-outline">Annuler</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    {% if lecon %}Enregistrer{% else %}Créer et assigner{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

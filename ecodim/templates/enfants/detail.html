@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% block title %}{{ enfant.prenom }} {{ enfant.nom }} — Écodim{% endblock %}
+{% block page_title %}Fiche Enfant{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ enfant.prenom }} {{ enfant.nom }}</h1>
+        <p>Détails et historique de présence</p>
+    </div>
+    <div style="display:flex; gap:10px;">
+        <a href="{% url 'enfant_modifier' enfant.pk %}" class="btn btn-primary">
+            <i class="fas fa-pen"></i> Modifier
+        </a>
+        <a href="{% url 'enfants_list' %}" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i> Retour
+        </a>
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns:340px 1fr; gap:24px;" class="detail-grid">
+
+    <!-- Fiche gauche -->
+    <div style="display:flex; flex-direction:column; gap:20px;">
+        <div class="card" style="text-align:center;">
+            <div style="width:80px; height:80px; border-radius:50%;
+                        background:var(--navy); color:white;
+                        display:flex; align-items:center; justify-content:center;
+                        font-size:28px; font-weight:700; margin:0 auto 16px;">
+                {{ enfant.prenom|first }}{{ enfant.nom|first }}
+            </div>
+            <h2 style="font-size:20px; font-weight:700; color:var(--navy);">
+                {{ enfant.prenom }} {{ enfant.nom }}
+            </h2>
+            <p style="color:var(--gray-400); font-size:13px; margin-top:4px;">
+                {{ enfant.age }} ans
+            </p>
+            <div style="margin-top:16px;">
+                {% if enfant.age <= 7 %}
+                <span class="badge badge-blue" style="font-size:13px; padding:6px 16px;">
+                    Classe A — 0 à 7 ans
+                </span>
+                {% else %}
+                <span class="badge badge-green" style="font-size:13px; padding:6px 16px;">
+                    Classe B — 8 ans et +
+                </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <p class="card-title">
+                <i class="fas fa-info-circle" style="color:var(--accent);"></i>
+                Informations
+            </p>
+            <div style="display:flex; flex-direction:column; gap:14px;">
+                <div>
+                    <p style="font-size:11px; color:var(--gray-400);
+                               text-transform:uppercase; font-weight:600;">
+                        Date de naissance
+                    </p>
+                    <p style="font-size:14px; color:var(--gray-800); margin-top:3px;">
+                        {{ enfant.date_naissance|date:"d/m/Y" }}
+                    </p>
+                </div>
+                <div>
+                    <p style="font-size:11px; color:var(--gray-400);
+                               text-transform:uppercase; font-weight:600;">
+                        Parent / Tuteur
+                    </p>
+                    <p style="font-size:14px; color:var(--gray-800); margin-top:3px;">
+                        {{ enfant.nom_parent|default:"Non renseigné" }}
+                    </p>
+                </div>
+                <div>
+                    <p style="font-size:11px; color:var(--gray-400);
+                               text-transform:uppercase; font-weight:600;">
+                        Téléphone
+                    </p>
+                    <p style="font-size:14px; color:var(--gray-800); margin-top:3px;">
+                        {{ enfant.telephone_parent|default:"Non renseigné" }}
+                    </p>
+                </div>
+                <div>
+                    <p style="font-size:11px; color:var(--gray-400);
+                               text-transform:uppercase; font-weight:600;">
+                        Inscrit depuis
+                    </p>
+                    <p style="font-size:14px; color:var(--gray-800); margin-top:3px;">
+                        {{ enfant.date_inscription|date:"d/m/Y" }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historique présences -->
+    <div class="card">
+        <p class="card-title">
+            <i class="fas fa-history" style="color:var(--accent);"></i>
+            Historique des présences
+        </p>
+
+        {% if presences %}
+        <!-- Stat rapide -->
+        {% with total=presences|length %}
+        <div style="display:flex; gap:16px; margin-bottom:20px;">
+            <div style="flex:1; background:var(--accent-light); border-radius:10px;
+                        padding:14px; text-align:center;">
+                <p style="font-size:22px; font-weight:700; color:var(--navy);">
+                    {{ total }}
+                </p>
+                <p style="font-size:12px; color:var(--gray-400);">Séances total</p>
+            </div>
+            <div style="flex:1; background:#ecfdf5; border-radius:10px;
+                        padding:14px; text-align:center;">
+                <p style="font-size:22px; font-weight:700; color:var(--success);">
+                    {% with presents=presences|length %}{{ presents }}{% endwith %}
+                </p>
+                <p style="font-size:12px; color:var(--gray-400);">Présences</p>
+            </div>
+        </div>
+        {% endwith %}
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date de la séance</th>
+                        <th>Présence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for presence in presences %}
+                    <tr>
+                        <td>{{ presence.seance.date|date:"d/m/Y" }}</td>
+                        <td>
+                            {% if presence.present %}
+                            <span class="badge badge-green">
+                                <i class="fas fa-check" style="margin-right:4px;"></i> Présent
+                            </span>
+                            {% else %}
+                            <span class="badge badge-red">
+                                <i class="fas fa-times" style="margin-right:4px;"></i> Absent
+                            </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align:center; padding:40px; color:var(--gray-400);">
+            <i class="fas fa-calendar-times" style="font-size:36px; opacity:0.3;
+               display:block; margin-bottom:12px;"></i>
+            Aucune présence enregistrée
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

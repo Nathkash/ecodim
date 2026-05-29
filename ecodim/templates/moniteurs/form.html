@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}Ajouter un moniteur — Écodim{% endblock %}
+{% block page_title %}Nouveau Moniteur{% endblock %}
+
+{% block content %}
+<div style="max-width:600px;">
+    <div class="page-header">
+        <div>
+            <h1>Ajouter un moniteur</h1>
+            <p>Créer un nouveau compte moniteur</p>
+        </div>
+        <a href="{% url 'moniteurs_list' %}" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    <div class="card">
+        <form method="POST">
+            {% csrf_token %}
+
+            <p class="card-title">
+                <i class="fas fa-user" style="color:var(--accent);"></i>
+                Informations personnelles
+            </p>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Prénom *</label>
+                    <input type="text" name="first_name" class="form-control"
+                           placeholder="Prénom" required>
+                </div>
+                <div class="form-group">
+                    <label>Nom *</label>
+                    <input type="text" name="last_name" class="form-control"
+                           placeholder="Nom" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Téléphone</label>
+                <input type="tel" name="telephone" class="form-control"
+                       placeholder="+243...">
+            </div>
+
+            <div style="border-top:1px solid var(--gray-100);
+                        padding-top:24px; margin-top:8px; margin-bottom:20px;">
+                <p class="card-title">
+                    <i class="fas fa-lock" style="color:var(--accent);"></i>
+                    Compte de connexion
+                </p>
+            </div>
+
+            <div class="form-group">
+                <label>Identifiant *</label>
+                <input type="text" name="username" class="form-control"
+                       placeholder="Identifiant unique" required>
+            </div>
+
+            <div class="form-group">
+                <label>Mot de passe *</label>
+                <input type="password" name="password" class="form-control"
+                       placeholder="Mot de passe" required>
+            </div>
+
+            <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:8px;">
+                <a href="{% url 'moniteurs_list' %}" class="btn btn-outline">Annuler</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Créer le compte
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

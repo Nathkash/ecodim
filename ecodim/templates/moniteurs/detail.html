@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block title %}{{ moniteur.first_name }} — Écodim{% endblock %}
+{% block page_title %}Profil Moniteur{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ moniteur.first_name }} {{ moniteur.last_name }}</h1>
+        <p>Profil et leçons assignées</p>
+    </div>
+    <a href="{% url 'moniteurs_list' %}" class="btn btn-outline">
+        <i class="fas fa-arrow-left"></i> Retour
+    </a>
+</div>
+
+<div style="display:grid; grid-template-columns:300px 1fr; gap:24px;">
+
+    <div class="card" style="height:fit-content;">
+        <div style="text-align:center; margin-bottom:20px;">
+            <div style="width:72px; height:72px; border-radius:50%;
+                        background:var(--navy); color:white;
+                        display:flex; align-items:center; justify-content:center;
+                        font-size:26px; font-weight:700; margin:0 auto 12px;">
+                {{ moniteur.first_name|first }}{{ moniteur.last_name|first }}
+            </div>
+            <h2 style="font-size:18px; font-weight:700; color:var(--navy);">
+                {{ moniteur.first_name }} {{ moniteur.last_name }}
+            </h2>
+            <span class="badge badge-blue" style="margin-top:6px;">Moniteur</span>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:14px;">
+            <div>
+                <p style="font-size:11px; color:var(--gray-400);
+                           text-transform:uppercase; font-weight:600;">Identifiant</p>
+                <p style="font-size:14px; color:var(--gray-800); margin-top:3px;">
+                    {{ moniteur.username }}
+                </p>
+            </div>
+            <div>
+                <p style="font-size:11px; color:var(--gray-400);
+                           text-transform:uppercase; font-weight:600;">Téléphone</p>
+                <p style="font-size:14px; color:var(--gray-800); margin-top:3px;">
+                    {{ moniteur.telephone|default:"Non renseigné" }}
+                </p>
+            </div>
+            <div>
+                <p style="font-size:11px; color:var(--gray-400);
+                           text-transform:uppercase; font-weight:600;">Classes assignées</p>
+                <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:6px;">
+                    {% for classe in moniteur.classes_assignees.all %}
+                    <span class="badge badge-navy">{{ classe.get_nom_display }}</span>
+                    {% empty %}
+                    <span style="font-size:13px; color:var(--gray-400);">Aucune</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div>
+                <p style="font-size:11px; color:var(--gray-400);
+                           text-transform:uppercase; font-weight:600;">Total leçons</p>
+                <p style="font-size:24px; font-weight:700; color:var(--navy); margin-top:3px;">
+                    {{ lecons|length }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <p class="card-title">
+            <i class="fas fa-book-open" style="color:var(--accent);"></i>
+            Leçons assignées
+        </p>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Titre</th>
+                        <th>Date</th>
+                        <th>Classe</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lecon in lecons %}
+                    <tr>
+                        <td>
+                            <p style="font-weight:600; color:var(--navy);">{{ lecon.titre }}</p>
+                            {% if lecon.reference_biblique %}
+                            <p style="font-size:12px; color:var(--gray-400);">
+                                {{ lecon.reference_biblique }}
+                            </p>
+                            {% endif %}
+                        </td>
+                        <td>{{ lecon.date|date:"d/m/Y" }}</td>
+                        <td>{{ lecon.classe }}</td>
+                        <td>
+                            {% if lecon.statut == 'a_venir' %}
+                            <span class="badge badge-blue">À venir</span>
+                            {% elif lecon.statut == 'donnee' %}
+                            <span class="badge badge-green">Donnée</span>
+                            {% else %}
+                            <span class="badge badge-orange">Reportée</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align:center; padding:30px;
+                            color:var(--gray-400);">Aucune leçon assignée</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

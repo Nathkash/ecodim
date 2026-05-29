@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}Enfants — Écodim{% endblock %}
+{% block page_title %}Gestion des Enfants{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Enfants</h1>
+        <p>{{ enfants|length }} enfant(s) enregistré(s)</p>
+    </div>
+    <a href="{% url 'enfant_ajouter' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Ajouter un enfant
+    </a>
+</div>
+
+<div class="card">
+    <!-- Recherche rapide -->
+    <div style="margin-bottom:20px;">
+        <div style="position:relative;">
+            <i class="fas fa-search" style="position:absolute; left:14px; top:50%;
+               transform:translateY(-50%); color:var(--gray-400);"></i>
+            <input type="text" id="searchInput" placeholder="Rechercher un enfant..."
+                   style="width:100%; padding:10px 14px 10px 40px; border:1.5px solid var(--gray-200);
+                          border-radius:8px; font-size:14px; font-family:'Inter',sans-serif;"
+                   onkeyup="filterTable()">
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table id="enfantsTable">
+            <thead>
+                <tr>
+                    <th>Enfant</th>
+                    <th>Âge</th>
+                    <th>Classe</th>
+                    <th>Parent / Tuteur</th>
+                    <th>Contact</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for enfant in enfants %}
+                <tr>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div class="avatar">
+                                {{ enfant.prenom|first }}{{ enfant.nom|first }}
+                            </div>
+                            <div>
+                                <p style="font-weight:600; color:var(--navy);">
+                                    {{ enfant.prenom }} {{ enfant.nom }}
+                                </p>
+                                <p style="font-size:12px; color:var(--gray-400);">
+                                    Né(e) le {{ enfant.date_naissance|date:"d/m/Y" }}
+                                </p>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span style="font-weight:600; color:var(--navy);">
+                            {{ enfant.age }} ans
+                        </span>
+                    </td>
+                    <td>
+                        {% if enfant.age <= 7 %}
+                        <span class="badge badge-blue">
+                            <i class="fas fa-star" style="margin-right:4px; font-size:9px;"></i>
+                            Classe A (0-7 ans)
+                        </span>
+                        {% else %}
+                        <span class="badge badge-green">
+                            <i class="fas fa-star" style="margin-right:4px; font-size:9px;"></i>
+                            Classe B (8 ans +)
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td style="color:var(--gray-600);">
+                        {{ enfant.nom_parent|default:"—" }}
+                    </td>
+                    <td style="color:var(--gray-600);">
+                        {% if enfant.telephone_parent %}
+                        <a href="tel:{{ enfant.telephone_parent }}"
+                           style="color:var(--accent); text-decoration:none;">
+                            <i class="fas fa-phone" style="margin-right:4px;"></i>
+                            {{ enfant.telephone_parent }}
+                        </a>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>
+                        {% if enfant.actif %}
+                        <span class="badge badge-green">Actif</span>
+                        {% else %}
+                        <span class="badge badge-red">Inactif</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display:flex; gap:6px;">
+                            <a href="{% url 'enfant_detail' enfant.pk %}"
+                               class="btn btn-outline btn-sm">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'enfant_modifier' enfant.pk %}"
+                               class="btn btn-primary btn-sm">
+                                <i class="fas fa-pen"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align:center; padding:40px;
+                        color:var(--gray-400);">
+                        <i class="fas fa-child" style="font-size:32px; margin-bottom:12px;
+                           display:block; opacity:0.3;"></i>
+                        Aucun enfant enregistré
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function filterTable() {
+    const input = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#enfantsTable tbody tr');
+    rows.forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(input) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}
+

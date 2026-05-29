@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Présences — Écodim{% endblock %}
+{% block page_title %}Gestion des Présences{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Présences</h1>
+        <p>{{ seances|length }} séance(s) enregistrée(s)</p>
+    </div>
+    {% if request.user.role == 'president' %}
+    <a href="{% url 'nouvelle_seance' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nouvelle séance
+    </a>
+    {% endif %}
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Jour</th>
+                <th>Enfants présents</th>
+                <th>Moniteurs présents</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for seance in seances %}
+            <tr>
+                <td>
+                    <p style="font-weight:600; color:var(--navy);">
+                        {{ seance.date|date:"d/m/Y" }}
+                    </p>
+                </td>
+                <td style="color:var(--gray-600);">
+                    {{ seance.date|date:"l" }}
+                </td>
+                <td>
+                    {% with total=seance.presences_enfants.count %}
+                    {% with presents=seance.presences_enfants.all %}
+                    <span class="badge badge-green">
+                        <i class="fas fa-child" style="margin-right:4px;"></i>
+                        {% for p in presents %}{% if p.present %}{{ forloop.counter }}{% endif %}{% endfor %}
+                        / {{ total }}
+                    </span>
+                    {% endwith %}
+                    {% endwith %}
+                </td>
+                <td>
+                    {% with total=seance.presences_moniteurs.count %}
+                    <span class="badge badge-blue">
+                        <i class="fas fa-user" style="margin-right:4px;"></i>
+                        {{ total }}
+                    </span>
+                    {% endwith %}
+                </td>
+                <td>
+                    <a href="{% url 'presence_seance' seance.pk %}"
+                       class="btn btn-outline btn-sm">
+                        <i class="fas fa-eye"></i> Voir / Modifier
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align:center; padding:40px; color:var(--gray-400);">
+                    <i class="fas fa-calendar-times" style="font-size:32px; opacity:0.3;
+                       display:block; margin-bottom:12px;"></i>
+                    Aucune séance enregistrée
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

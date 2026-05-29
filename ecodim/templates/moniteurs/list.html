@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Moniteurs — Écodim{% endblock %}
+{% block page_title %}Gestion des Moniteurs{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Moniteurs</h1>
+        <p>{{ moniteurs|length }} moniteur(s) enregistré(s)</p>
+    </div>
+    <a href="{% url 'moniteur_ajouter' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Ajouter un moniteur
+    </a>
+</div>
+
+<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:20px;">
+    {% for moniteur in moniteurs %}
+    <div class="card" style="padding:24px;">
+        <div style="display:flex; align-items:center; gap:14px; margin-bottom:18px;">
+            <div style="width:52px; height:52px; border-radius:50%;
+                        background:var(--navy); color:white;
+                        display:flex; align-items:center; justify-content:center;
+                        font-size:18px; font-weight:700; flex-shrink:0;">
+                {{ moniteur.first_name|first }}{{ moniteur.last_name|first }}
+            </div>
+            <div>
+                <p style="font-weight:700; color:var(--navy); font-size:15px;">
+                    {{ moniteur.first_name }} {{ moniteur.last_name }}
+                </p>
+                <span class="badge badge-blue" style="margin-top:4px;">Moniteur</span>
+            </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:18px;">
+            <div style="display:flex; align-items:center; gap:10px;
+                        font-size:13px; color:var(--gray-600);">
+                <i class="fas fa-user" style="color:var(--gray-400); width:16px;"></i>
+                {{ moniteur.username }}
+            </div>
+            {% if moniteur.telephone %}
+            <div style="display:flex; align-items:center; gap:10px;
+                        font-size:13px; color:var(--gray-600);">
+                <i class="fas fa-phone" style="color:var(--gray-400); width:16px;"></i>
+                {{ moniteur.telephone }}
+            </div>
+            {% endif %}
+            <div style="display:flex; align-items:center; gap:10px;
+                        font-size:13px; color:var(--gray-600);">
+                <i class="fas fa-chalkboard" style="color:var(--gray-400); width:16px;"></i>
+                {% with classes=moniteur.classes_assignees.all %}
+                    {% if classes %}
+                        {% for c in classes %}{{ c.get_nom_display }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                    {% else %}
+                        <span style="color:var(--gray-400);">Aucune classe</span>
+                    {% endif %}
+                {% endwith %}
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;
+                        font-size:13px; color:var(--gray-600);">
+                <i class="fas fa-book-open" style="color:var(--gray-400); width:16px;"></i>
+                {{ moniteur.lecons_assignees.count }} leçon(s)
+            </div>
+        </div>
+
+        <a href="{% url 'moniteur_detail' moniteur.pk %}" class="btn btn-outline"
+           style="width:100%; justify-content:center;">
+            <i class="fas fa-eye"></i> Voir le profil
+        </a>
+    </div>
+    {% empty %}
+    <div style="grid-column:1/-1; text-align:center; padding:60px; color:var(--gray-400);">
+        <i class="fas fa-users" style="font-size:40px; opacity:0.3;
+           display:block; margin-bottom:16px;"></i>
+        Aucun moniteur enregistré
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

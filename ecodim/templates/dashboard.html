@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% block title %}Tableau de bord — Écodim{% endblock %}
+{% block page_title %}Tableau de bord{% endblock %}
+
+{% block content %}
+
+{% if request.user.role == 'president' %}
+<!-- ═══ DASHBOARD PRÉSIDENT ═══ -->
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon blue"><i class="fas fa-child"></i></div>
+        <div class="stat-info">
+            <p>Total Enfants</p>
+            <h3>{{ total_enfants }}</h3>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon green"><i class="fas fa-users"></i></div>
+        <div class="stat-info">
+            <p>Moniteurs</p>
+            <h3>{{ total_moniteurs }}</h3>
+        </div>
+    </div>
+    {% for classe in classes %}
+    <div class="stat-card">
+        <div class="stat-icon orange"><i class="fas fa-chalkboard"></i></div>
+        <div class="stat-info">
+            <p>Classe {{ classe.nom }}</p>
+            <h3>{{ classe.get_nom_display }}</h3>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;" class="dashboard-grid">
+
+    <!-- Prochaines leçons -->
+    <div class="card">
+        <div class="card-title">
+            <i class="fas fa-book-open" style="color:var(--accent)"></i>
+            Prochaines leçons
+        </div>
+        {% if prochaines_lecons %}
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            {% for lecon in prochaines_lecons %}
+            <div style="display:flex; align-items:center; justify-content:space-between;
+                        padding:14px; background:var(--gray-50); border-radius:10px;
+                        border-left:4px solid var(--accent);">
+                <div>
+                    <p style="font-weight:600; font-size:14px; color:var(--navy)">{{ lecon.titre }}</p>
+                    <p style="font-size:12px; color:var(--gray-400); margin-top:3px;">
+                        <i class="fas fa-calendar"></i> {{ lecon.date|date:"d/m/Y" }} &nbsp;·&nbsp;
+                        <i class="fas fa-chalkboard"></i> {{ lecon.classe }}
+                    </p>
+                </div>
+                <div>
+                    <p style="font-size:12px; color:var(--gray-600); font-weight:500;">
+                        {{ lecon.moniteur_assigne.first_name }}
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:var(--gray-400); font-size:14px; text-align:center; padding:20px;">
+            Aucune leçon planifiée
+        </p>
+        {% endif %}
+        <div style="margin-top:16px;">
+            <a href="{% url 'lecon_ajouter' %}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Nouvelle leçon
+            </a>
+        </div>
+    </div>
+
+    <!-- Dernières séances -->
+    <div class="card">
+        <div class="card-title">
+            <i class="fas fa-check-square" style="color:var(--success)"></i>
+            Dernières séances
+        </div>
+        {% if dernieres_seances %}
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            {% for seance in dernieres_seances %}
+            <div style="display:flex; align-items:center; justify-content:space-between;
+                        padding:14px; background:var(--gray-50); border-radius:10px;">
+                <div>
+                    <p style="font-weight:600; font-size:14px; color:var(--navy)">
+                        {{ seance.date|date:"d/m/Y" }}
+                    </p>
+                    <p style="font-size:12px; color:var(--gray-400); margin-top:3px;">
+                        <i class="fas fa-calendar-day"></i> {{ seance.date|date:"l" }}
+                    </p>
+                </div>
+                <a href="{% url 'presence_seance' seance.pk %}" class="btn btn-outline btn-sm">
+                    <i class="fas fa-eye"></i> Voir
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:var(--gray-400); font-size:14px; text-align:center; padding:20px;">
+            Aucune séance enregistrée
+        </p>
+        {% endif %}
+        <div style="margin-top:16px;">
+            <a href="{% url 'nouvelle_seance' %}" class="btn btn-accent btn-sm">
+                <i class="fas fa-plus"></i> Nouvelle séance
+            </a>
+        </div>
+    </div>
+
+</div>
+
+{% else %}
+<!-- ═══ DASHBOARD MONITEUR ═══ -->
+
+<div style="margin-bottom:24px;">
+    <div style="background:linear-gradient(135deg, var(--navy), #1a3f7a);
+                border-radius:16px; padding:28px 32px; color:white;
+                display:flex; align-items:center; justify-content:space-between;">
+        <div>
+            <h2 style="font-size:22px; font-weight:700;">
+                Bonjour, {{ request.user.first_name }} 👋
+            </h2>
+            <p style="color:rgba(255,255,255,0.6); margin-top:6px; font-size:14px;">
+                Voici votre espace moniteur
+            </p>
+        </div>
+        <div style="font-size:48px; opacity:0.2;">
+            <i class="fas fa-chalkboard-teacher"></i>
+        </div>
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+
+    <!-- Mes classes -->
+    <div class="card">
+        <div class="card-title">
+            <i class="fas fa-chalkboard" style="color:var(--accent)"></i>
+            Mes classes assignées
+        </div>
+        {% if mes_classes %}
+            {% for classe in mes_classes %}
+            <div style="padding:16px; background:var(--accent-light);
+                        border-radius:10px; margin-bottom:10px;
+                        border-left:4px solid var(--accent);">
+                <p style="font-weight:700; color:var(--navy); font-size:16px;">
+                    {{ classe.get_nom_display }}
+                </p>
+                <a href="{% url 'enfants_list' %}" style="font-size:12px;
+                   color:var(--accent); text-decoration:none; margin-top:4px; display:inline-block;">
+                    <i class="fas fa-arrow-right"></i> Voir les enfants
+                </a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color:var(--gray-400); font-size:14px; text-align:center; padding:20px;">
+                Aucune classe assignée pour le moment
+            </p>
+        {% endif %}
+    </div>
+
+    <!-- Mes prochaines leçons -->
+    <div class="card">
+        <div class="card-title">
+            <i class="fas fa-book-open" style="color:var(--warning)"></i>
+            Mes prochaines leçons
+        </div>
+        {% if mes_lecons %}
+            {% for lecon in mes_lecons %}
+            <div style="padding:14px; background:var(--gray-50);
+                        border-radius:10px; margin-bottom:10px;
+                        border-left:4px solid var(--warning);">
+                <p style="font-weight:600; color:var(--navy); font-size:14px;">
+                    {{ lecon.titre }}
+                </p>
+                <p style="font-size:12px; color:var(--gray-400); margin-top:4px;">
+                    <i class="fas fa-calendar"></i> {{ lecon.date|date:"d/m/Y" }}
+                    &nbsp;·&nbsp; {{ lecon.classe }}
+                </p>
+                {% if lecon.reference_biblique %}
+                <p style="font-size:12px; color:var(--accent); margin-top:4px;">
+                    <i class="fas fa-bible"></i> {{ lecon.reference_biblique }}
+                </p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color:var(--gray-400); font-size:14px; text-align:center; padding:20px;">
+                Aucune leçon assignée
+            </p>
+        {% endif %}
+        <a href="{% url 'lecons_list' %}" class="btn btn-outline btn-sm" style="margin-top:8px;">
+            <i class="fas fa-list"></i> Toutes mes leçons
+        </a>
+    </div>
+
+</div>
+{% endif %}
+
+{% endblock %}

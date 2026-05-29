@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}{{ lecon.titre }} — Écodim{% endblock %}
+{% block page_title %}Détail Leçon{% endblock %}
+
+{% block content %}
+<div style="max-width:700px;">
+    <div class="page-header">
+        <div>
+            <h1>{{ lecon.titre }}</h1>
+            <p>{{ lecon.date|date:"d/m/Y" }} — {{ lecon.classe }}</p>
+        </div>
+        <div style="display:flex; gap:10px;">
+            {% if request.user.role == 'president' %}
+            <a href="{% url 'lecon_modifier' lecon.pk %}" class="btn btn-primary">
+                <i class="fas fa-pen"></i> Modifier
+            </a>
+            {% endif %}
+            <a href="{% url 'lecons_list' %}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+            <div>
+                <p style="font-size:11px; color:var(--gray-400);
+                           text-transform:uppercase; font-weight:600;">Titre</p>
+                <p style="font-size:16px; font-weight:700; color:var(--navy); margin-top:4px;">
+                    {{ lecon.titre }}
+                </p>
+            </div>
+            <div>
+                <p style="font-size:11px; color:var(--gray-400);
+                           text-transform:uppercase; font-weight:600;">Statut</p>
+                <div style="margin-top:4px;">
+                    {% if lecon.statut == 'a_venir' %}
+                    <span class="badge badge-blue" style="font-size:13px;">À venir</span>
+                    {% elif lecon.statut == 'donnee' %}
+                    <span class="badge badge-green" style="font-size:13px;">Donnée</span>
+                    {% else %}
+                    <span class="badge badge-orange" style="font-size:13px;">Reportée</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div>
+                <p style="font-size:11px; color:var(--gray-400);
+                           text-transform:uppercase; font-weight:600;">Thème</p>
+                <p style="font-size:14px; color:var(--gray-800); margin-top:4px;">
+                    {{ lecon.theme|default:"—" }}
+                </p>
+            </div>
+            <div>
+                <p style="font-size:11px; color:var(--gray-400);
+                           text-transform:uppercase; font-weight:600;">Référence biblique</p>
+                <p style="font-size:14px; color:var(--accent); margin-top:4px; font-weight:600;">
+                    {{ lecon.reference_biblique|default:"—" }}
+                </p>
+            </div>
+            <div>
+                <p style="font-size:11px; color:var(--gray-400);
+                           text-transform:uppercase; font-weight:600;">Date</p>
+                <p style="font-size:14px; color:var(--gray-800); margin-top:4px;">
+                    {{ lecon.date|date:"d/m/Y" }}
+                </p>
+            </div>
+            <div>
+                <p style="font-size:11px; color:var(--gray-400);
+                           text-transform:uppercase; font-weight:600;">Classe</p>
+                <p style="font-size:14px; color:var(--gray-800); margin-top:4px;">
+                    {{ lecon.classe }}
+                </p>
+            </div>
+            <div style="grid-column:1/-1;">
+                <p style="font-size:11px; color:var(--gray-400);
+                           text-transform:uppercase; font-weight:600;">Moniteur assigné</p>
+                <div style="display:flex; align-items:center; gap:12px; margin-top:8px;">
+                    <div class="avatar" style="width:40px; height:40px; font-size:15px;">
+                        {{ lecon.moniteur_assigne.first_name|first }}{{ lecon.moniteur_assigne.last_name|first }}
+                    </div>
+                    <p style="font-size:15px; font-weight:600; color:var(--navy);">
+                        {{ lecon.moniteur_assigne.first_name }}
+                        {{ lecon.moniteur_assigne.last_name }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
