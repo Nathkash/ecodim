@@ -1,1 +1,1 @@
-web: gunicorn ecodim.wsgi --log-file -
+web: python manage.py migrate && python manage.py init_classes && gunicorn ecodim.wsgi --log-file -
