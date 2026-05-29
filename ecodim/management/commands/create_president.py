@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from core.models import User
+from ecodim.models import User
 
 class Command(BaseCommand):
     help = 'Crée le compte président par défaut'
