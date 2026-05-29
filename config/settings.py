@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     'ecodim',
 ]
@@ -91,6 +92,14 @@ USE_TZ = True
 # ── FICHIERS STATIQUES ──
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+STATICFILES_DIRS = []
+
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+
 STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
 
 # ── MÉDIAS ──
