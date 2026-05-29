@@ -11,27 +11,18 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config, Csv
+import dj_database_url
 import os
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# ── SÉCURITÉ ──
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-changez-moi-en-production')
+DEBUG = config('DEBUG', default=False, cast=bool)
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*', cast=Csv())
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ru3p4j+4_jj=5*&)9w&1cj@)tcr*fcc&u_e*fn1lhq3!a!y-g$'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
-AUTH_USER_MODEL = 'ecodim.User'
-
-# Application definition
-
+# ── APPLICATIONS ──
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -44,6 +35,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # ← Whitenoise ici
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -61,6 +53,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -71,61 +64,39 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
+# ── BASE DE DONNÉES ──
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=config('DATABASE_URL', default=f'sqlite:///{BASE_DIR}/db.sqlite3')
+    )
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
-
+# ── MOT DE PASSE ──
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+# ── MODÈLE UTILISATEUR ──
+AUTH_USER_MODEL = 'ecodim.User'
 
-# Internationalization
-# https://docs.djangoproject.com/en/6.0/topics/i18n/
-
+# ── LANGUE & TIMEZONE ──
 LANGUAGE_CODE = 'fr-fr'
-
 TIME_ZONE = 'Africa/Kinshasa'
-
 USE_I18N = True
-
 USE_TZ = True
 
+# ── FICHIERS STATIQUES ──
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
-
-STATIC_URL = 'static/'
-
-
+# ── MÉDIAS ──
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# URL where requests are redirected for login. Default Django value is '/accounts/login/'
-# which in this project caused 404s because we use a custom login view at path ''.
+# ── DIVERS ──
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/login/'
-# Optional: where to redirect after login if not specified elsewhere
-LOGIN_REDIRECT_URL = 'dashboard'
-

@@ -1,0 +1,1 @@
+web: gunicorn ecodim.wsgi --log-file -
