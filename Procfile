@@ -1,1 +1,1 @@
-web: python manage.py migrate && python manage.py init_classes && gunicorn ecodim.wsgi --log-file -
+web: python manage.py migrate && python manage.py init_classes && python manage.py create_president && gunicorn ecodim.wsgi --log-file -
