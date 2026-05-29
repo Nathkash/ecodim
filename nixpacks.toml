@@ -1,8 +1,5 @@
 [phases.build]
-cmds = [
-    "pip install -r requirements.txt",
-    "python manage.py collectstatic --noinput"
-]
+cmds = ["bash build.sh"]
 
 [start]
-cmd = "python manage.py migrate && python manage.py init_classes && python manage.py create_president && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT"
+cmd = "gunicorn config.wsgi:application --bind 0.0.0.0:$PORT"
